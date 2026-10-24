@@ -40,18 +40,6 @@ $page_title = 'Đăng nhập - Bảo Tàng Khmer Vĩnh Long';
 include 'includes/header.php';
 ?>
 
-<div class="bg-primary-custom text-white py-4">
-    <div class="container">
-        <h2 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập</h2>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 mt-1">
-                <li class="breadcrumb-item"><a href="index.php" class="text-warning">Trang chủ</a></li>
-                <li class="breadcrumb-item active text-white">Đăng nhập</li>
-            </ol>
-        </nav>
-    </div>
-</div>
-
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5 col-lg-4">

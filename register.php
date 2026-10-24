@@ -30,10 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             // ── Hàm gửi email ────────────────────────────────
             function sendMail($to, $toName, $subject, $body) {
-                if (MAIL_USERNAME === '' || MAIL_PASSWORD === '' || MAIL_ADMIN === '') {
-                    throw new Exception('Chưa cấu hình thông tin SMTP trên máy chủ.');
-                }
-
                 $mail = new PHPMailer(true);
                 $mail->isSMTP();
                 $mail->Host       = MAIL_HOST;

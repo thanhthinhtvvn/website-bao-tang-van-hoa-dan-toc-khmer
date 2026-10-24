@@ -1,14 +1,4 @@
 <?php if (session_status() === PHP_SESSION_NONE) session_start(); ?>
-<?php
-// Thống kê nhanh cho navbar (chỉ chạy khi đã có $conn)
-$_nav_stats = [];
-if (isset($conn)) {
-    $_nav_stats['artifacts'] = $conn->query("SELECT COUNT(*) as t FROM artifacts")->fetch_assoc()['t'] ?? 0;
-    $_nav_stats['events']    = $conn->query("SELECT COUNT(*) as t FROM events")->fetch_assoc()['t'] ?? 0;
-    $_nav_stats['visits']    = $conn->query("SELECT COUNT(*) as t FROM visits")->fetch_assoc()['t'] ?? 0;
-    $_nav_stats['reviews']   = $conn->query("SELECT COUNT(*) as t FROM reviews")->fetch_assoc()['t'] ?? 0;
-}
-?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -26,11 +16,17 @@ if (isset($conn)) {
             --dark: #1a1a1a;
         }
         body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             background-color: #fdf6e3;
+        }
+        body > footer {
+            margin-top: auto;
         }
         /* Navbar */
         .navbar-custom {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            background: var(--gold);
         }
         .navbar-custom .navbar-brand,
         .navbar-custom .nav-link {
@@ -38,27 +34,6 @@ if (isset($conn)) {
         }
         .navbar-custom .nav-link:hover {
             color: var(--dark) !important;
-        }
-        /* Dropdown thống kê */
-        .dropdown-stats .dropdown-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            pointer-events: none;
-            font-family: inherit;
-        }
-        .dropdown-stats .stat-number {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--gold-light);
-            min-width: 36px;
-            text-align: right;
-        }
-        .dropdown-stats .stat-label {
-            flex: 1;
-            font-family: inherit;
-            font-style: normal;
         }
         .navbar-custom .dropdown-menu {
             background: #2d2010;
@@ -150,7 +125,7 @@ if (isset($conn)) {
         .star-rating { color: var(--gold); }
         /* Carousel */
         .carousel-bg {
-            height: 360px;
+            height: 400px;
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
@@ -196,17 +171,20 @@ if (isset($conn)) {
         }
         /* Footer */
         footer {
-            background-color: #1a1208;
-            color: #c9b06a;
+            background-color: var(--gold);
+            color: #fff;
             padding: 40px 0 20px;
             margin-top: 60px;
         }
-        footer a { color: #c9b06a !important; }
-        footer a:hover { color: var(--gold-light) !important; }
-        footer h5, footer h6 { color: var(--gold-light) !important; }
-        footer hr { border-color: #3a2e10; }
+        footer .text-secondary,
+        footer .footer-muted,
+        footer .text-warning { color: #fff !important; }
+        footer a { color: #fff !important; }
+        footer a:hover { color: #fff !important; }
+        footer h5, footer h6 { color: #fff !important; }
+        footer hr { border-color: rgba(255,255,255,.5) !important; }
         @media (max-width: 576px) {
-            .carousel-bg { height: 220px; }
+            .carousel-bg { height: 250px; }
             .carousel-caption-custom h1 { font-size: 1.2rem; }
         }
     </style>
@@ -233,46 +211,6 @@ if (isset($conn)) {
                             <i class="fas fa-calendar-check me-1"></i>Đăng ký tham quan
                         </a>
                     </li>
-
-                    <!-- Dropdown: Thống kê -->
-                    <?php if (!empty($_nav_stats)): ?>
-                    <li class="nav-item dropdown dropdown-stats">
-                        <a class="nav-link dropdown-toggle" href="#"
-                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-chart-bar me-1"></i>Thống kê
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" style="min-width:220px;">
-                            <li class="px-3 py-1">
-                                <small class="text-uppercase" style="color:var(--gold-light);letter-spacing:.08em;font-size:.72rem;">Tổng quan bảo tàng</small>
-                            </li>
-                            <li><hr class="dropdown-divider" style="border-color:rgba(200,150,30,0.3);margin:4px 0"></li>
-                            <li>
-                                <span class="dropdown-item">
-                                    <span class="stat-label"><i class="fas fa-cubes me-2" style="color:var(--gold)"></i>Hiện vật</span>
-                                    <span class="stat-number"><?= $_nav_stats['artifacts'] ?></span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="dropdown-item">
-                                    <span class="stat-label"><i class="fas fa-calendar-alt me-2" style="color:var(--gold)"></i>Sự kiện</span>
-                                    <span class="stat-number"><?= $_nav_stats['events'] ?></span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="dropdown-item">
-                                    <span class="stat-label"><i class="fas fa-users me-2" style="color:var(--gold)"></i>Lượt tham quan</span>
-                                    <span class="stat-number"><?= $_nav_stats['visits'] ?></span>
-                                </span>
-                            </li>
-                            <li>
-                                <span class="dropdown-item">
-                                    <span class="stat-label"><i class="fas fa-star me-2" style="color:var(--gold)"></i>Đánh giá</span>
-                                    <span class="stat-number"><?= $_nav_stats['reviews'] ?></span>
-                                </span>
-                            </li>
-                        </ul>
-                    </li>
-                    <?php endif; ?>
 
                     <!-- Tài khoản -->                    <?php if (isset($_SESSION['user_id'])): ?>
                     <li class="nav-item dropdown">

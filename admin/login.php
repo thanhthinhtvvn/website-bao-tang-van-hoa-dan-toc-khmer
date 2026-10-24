@@ -36,19 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Bảo Tàng Khmer Vĩnh Long</title>
+    <title>Đăng nhập quản trị viên - Bảo tàng Văn hóa Dân tộc Khmer tỉnh Vĩnh long</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #8B1A1A 0%, #5a0f0f 100%);
+            background: #c8961e;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .login-card {
-            background: white;
+            background: #121212;
+            color: #f8f5ed;
             border-radius: 16px;
             padding: 40px;
             width: 100%;
@@ -64,13 +65,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #8B1A1A;
         }
         .login-logo h4 {
-            color: #8B1A1A;
+            color: #f5dfa0;
             font-weight: 700;
             margin-top: 10px;
             font-size: 16px;
         }
+        .login-logo p { color: #c8c8c8 !important; }
+        .login-card .input-group-text,
+        .login-card .form-control {
+            border-color: #414141;
+            background-color: #121212;
+            color: #f8f5ed;
+        }
+        .login-card .input-group-text { color: #c8c8c8; }
+        .login-card .form-control::placeholder { color: #aeb4bc; }
         .btn-login {
-            background: linear-gradient(135deg, #8B1A1A, #C8961E);
+            background: #b42323;
             border: none;
             color: white;
             width: 100%;
@@ -80,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: 600;
         }
         .btn-login:hover {
-            opacity: 0.9;
+            background: #8f1717;
             color: white;
         }
         .form-control:focus {
@@ -92,16 +102,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 20px;
         }
         .back-link a {
-            color: #8B1A1A;
+            color: #f5dfa0;
             text-decoration: none;
             font-size: 14px;
         }
+        .login-card a[href="forgot_password.php"] { color: #f5dfa0 !important; }
     </style>
 </head>
 <body>
     <div class="login-card">
         <div class="login-logo">
-            <i class="fas fa-landmark"></i>
             <h4>BẢO TÀNG VĂN HÓA DÂN TỘC KHMER<br>TỈNH VĨNH LONG</h4>
             <p class="text-muted small mb-0">Đăng nhập quản trị hệ thống</p>
         </div>

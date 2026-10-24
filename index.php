@@ -1,5 +1,7 @@
 <?php
 require_once 'config/db.php';
+require_once 'includes/event_image.php';
+require_once 'includes/event_description.php';
 $page_title = 'Trang chủ - Bảo tàng Văn hóa Dân tộc Khmer';
 include 'includes/header.php';
 
@@ -10,7 +12,7 @@ $total_reviews   = $conn->query("SELECT COUNT(*) as total FROM reviews")->fetch_
 $total_events    = $conn->query("SELECT COUNT(*) as total FROM events")->fetch_assoc()['total'];
 
 // Sự kiện mới nhất
-$events = $conn->query("SELECT * FROM events ORDER BY event_date DESC LIMIT 3");
+$events = $conn->query("SELECT * FROM events ORDER BY event_date DESC LIMIT 4");
 
 // Hiện vật nổi bật
 $artifacts = $conn->query("SELECT a.*, c.name as category_name FROM artifacts a 
@@ -40,7 +42,7 @@ if ($slides && $slides->num_rows > 0) {
         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="<?= $i ?>"
             <?= $i === 0 ? 'class="active" aria-current="true"' : '' ?>></button>
         <?php endforeach; ?>
-    </div>
+        </div>
     <div class="carousel-inner">
         <?php foreach ($slides_arr as $i => $slide): ?>
         <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
@@ -71,58 +73,58 @@ if ($slides && $slides->num_rows > 0) {
 <!-- Thống kê đã chuyển lên navbar -->
 
 <!-- Sự kiện -->
-<div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="text-primary-custom fw-bold">Sự kiện nổi bật</h3>
-        <a href="events.php" class="btn btn-outline-danger btn-sm">Xem tất cả</a>
-    </div>
-    <div class="row">
-        <?php if ($events->num_rows > 0): ?>
-            <?php while ($event = $events->fetch_assoc()): ?>
-            <div class="col-md-4 mb-4">
-                <a href="events.php" class="text-decoration-none text-dark">
-                <div class="card h-100 shadow-sm card-hover border-0">
-                    <?php if (!empty($event['image'])): ?>
-                        <img src="uploads/events/<?= htmlspecialchars($event['image']) ?>" class="card-img-top" style="height:200px;object-fit:cover" alt="">
-                    <?php else: ?>
-                        <div class="bg-secondary d-flex align-items-center justify-content-center" style="height:200px">
-                            <i class="fas fa-calendar-star fa-3x text-white opacity-50"></i>
+<section class="bg-white py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="text-primary-custom fw-bold">Sự kiện nổi bật</h3>
+            <a href="events.php" class="btn btn-warning btn-sm">Xem tất cả</a>
+        </div>
+        <div class="row">
+            <?php if ($events->num_rows > 0): ?>
+                <?php while ($event = $events->fetch_assoc()): ?>
+                <?php $event_image = event_image_src($event['image'] ?? ''); ?>
+                <?php $event_description = event_description_without_time($event['description'] ?? null); ?>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <a href="events.php" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm card-hover" style="border:1px solid #C8961E;background-color:#C8961E;color:#fff;">
+                        <?php if ($event_image !== null): ?>
+                            <img src="<?= htmlspecialchars($event_image, ENT_QUOTES, 'UTF-8') ?>" class="card-img-top" style="height:200px;object-fit:cover" alt="">
+                        <?php else: ?>
+                            <div class="bg-secondary d-flex align-items-center justify-content-center" style="height:200px">
+                                <i class="fas fa-calendar-star fa-3x text-white opacity-50"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="card-body">
+                            <h5 class="card-title text-white"><?= htmlspecialchars($event['title']) ?></h5>
+                            <p class="card-text text-white small"><?= htmlspecialchars(mb_substr($event_description, 0, 100)) ?>...</p>
                         </div>
-                    <?php endif; ?>
-                    <div class="card-body">
-                        <span class="badge bg-warning text-dark mb-2">
-                            <i class="far fa-calendar me-1"></i>
-                            <?= date('d/m/Y', strtotime($event['event_date'])) ?>
-                        </span>
-                        <h5 class="card-title"><?= htmlspecialchars($event['title']) ?></h5>
-                        <p class="card-text text-muted small"><?= htmlspecialchars(mb_substr($event['description'], 0, 100)) ?>...</p>
                     </div>
+                    </a>
                 </div>
-                </a>
-            </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <div class="col-12 text-center text-muted py-4">
-                <i class="fas fa-calendar-times fa-2x mb-2"></i>
-                <p>Chưa có sự kiện nào.</p>
-            </div>
-        <?php endif; ?>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="col-12 text-center text-muted py-4">
+                    <i class="fas fa-calendar-times fa-2x mb-2"></i>
+                    <p>Chưa có sự kiện nào.</p>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
-</div>
+</section>
 
 <!-- Hiện vật nổi bật -->
 <div class="bg-light py-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="text-primary-custom fw-bold">Hiện vật nổi bật</h3>
-            <a href="artifacts.php" class="btn btn-outline-danger btn-sm">Xem tất cả</a>
+            <a href="artifacts.php" class="btn btn-warning btn-sm">Xem tất cả</a>
         </div>
         <div class="row">
             <?php if ($artifacts->num_rows > 0): ?>
                 <?php while ($artifact = $artifacts->fetch_assoc()): ?>
                 <div class="col-md-4 col-6 mb-4">
                     <a href="artifacts.php" class="text-decoration-none text-dark">
-                    <div class="card h-100 shadow-sm card-hover border-0">
+                    <div class="card h-100 shadow-sm card-hover border-0" style="background-color:#C8961E;color:#fff;">
                         <?php if (!empty($artifact['image'])): ?>
                             <img src="uploads/artifacts/<?= htmlspecialchars($artifact['image']) ?>" class="card-img-top" style="height:180px;object-fit:cover" alt="">
                         <?php else: ?>
@@ -134,10 +136,10 @@ if ($slides && $slides->num_rows > 0) {
                             <?php if (!empty($artifact['category_name'])): ?>
                                 <span class="badge bg-danger mb-1"><?= htmlspecialchars($artifact['category_name']) ?></span>
                             <?php endif; ?>
-                            <h6 class="card-title mt-1"><?= htmlspecialchars($artifact['name']) ?></h6>
-                            <p class="card-text text-muted small"><?= htmlspecialchars(mb_substr($artifact['description'], 0, 80)) ?>...</p>
+                            <h6 class="card-title mt-1 text-white"><?= htmlspecialchars($artifact['name']) ?></h6>
+                            <p class="card-text text-white small"><?= htmlspecialchars(mb_substr($artifact['description'], 0, 80)) ?>...</p>
                             <?php if (!empty($artifact['origin'])): ?>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt me-1 text-danger"></i><?= htmlspecialchars($artifact['origin']) ?></small>
+                                <small class="text-white"><i class="fas fa-map-marker-alt me-1"></i><?= htmlspecialchars($artifact['origin']) ?></small>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -158,7 +160,7 @@ if ($slides && $slides->num_rows > 0) {
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="text-primary-custom fw-bold">Đánh giá của khách tham quan</h3>
-        <a href="review.php" class="btn btn-outline-danger btn-sm">Viết đánh giá</a>
+        <a href="review.php" class="btn btn-warning btn-sm">Viết đánh giá</a>
     </div>
     <div class="row">
         <?php if ($reviews->num_rows > 0): ?>

@@ -15,7 +15,9 @@ DROP TABLE IF EXISTS events;
 DROP TABLE IF EXISTS media;
 DROP TABLE IF EXISTS artifacts;
 DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS pending_user_registrations;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS admin_password_resets;
 DROP TABLE IF EXISTS admins;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -28,6 +30,17 @@ CREATE TABLE admins (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE admin_password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_admin_password_resets_admin_created (admin_id, created_at),
+    CONSTRAINT fk_admin_password_resets_admin
+        FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. CATEGORIES
@@ -83,6 +96,20 @@ CREATE TABLE users (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE pending_user_registrations (
+    email VARCHAR(100) NOT NULL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    verification_code_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    request_ip VARCHAR(45) NOT NULL,
+    last_sent_at DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_pending_user_registrations_ip_sent (request_ip, last_sent_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 6. VISITS
 CREATE TABLE visits (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -100,6 +127,11 @@ CREATE TABLE media (
     `table` VARCHAR(100) NOT NULL COMMENT 'Tên bảng sử dụng ảnh, vd: hero_slides, events',
     content VARCHAR(255)          COMMENT 'Mô tả / tên ảnh',
     url     TEXT         NOT NULL COMMENT 'Đường dẫn ảnh (URL hoặc đường dẫn file)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE site_settings (
+    setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value TEXT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 8. REVIEWS

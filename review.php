@@ -34,13 +34,22 @@ $reviews = $conn->query("SELECT r.*, u.full_name FROM reviews r
 include 'includes/header.php';
 ?>
 
-<!-- Banner -->
-<div style="background:linear-gradient(135deg,#C8961E,#a07010);color:white;padding:50px 0;text-align:center;">
-    <div class="container">
-        <h2 class="fw-bold"><i class="fas fa-star me-2"></i>Đánh Giá Của Khách Tham Quan</h2>
-        <p class="mb-0">Chia sẻ trải nghiệm của bạn về Bảo tàng Văn hóa Dân tộc Khmer</p>
-    </div>
-</div>
+<style>
+    .review-star {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: #aaa;
+        font-size: 1.8rem;
+        line-height: 1;
+        cursor: pointer;
+        transition: color .15s ease;
+    }
+    .review-star.is-active,
+    .review-star.is-preview {
+        color: #C8961E;
+    }
+</style>
 
 <div class="container py-5">
     <div class="row g-4">
@@ -99,9 +108,12 @@ include 'includes/header.php';
                         <!-- Chọn sao -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold small">Đánh giá <span class="text-danger">*</span></label>
-                            <div class="d-flex gap-1" id="starRow" style="font-size:1.8rem;cursor:pointer;">
+                            <div class="d-flex gap-1" id="starRow" role="radiogroup" aria-label="Chọn số sao đánh giá">
                                 <?php for ($i=1;$i<=5;$i++): ?>
-                                <i class="fas fa-star star-btn text-muted" data-val="<?= $i ?>"></i>
+                                <button type="button" class="review-star star-btn" data-val="<?= $i ?>"
+                                        role="radio" aria-checked="false" aria-label="<?= $i ?> sao">
+                                    <i class="fas fa-star" aria-hidden="true"></i>
+                                </button>
                                 <?php endfor; ?>
                             </div>
                             <input type="hidden" name="rating" id="ratingInput" required>
@@ -165,15 +177,19 @@ include 'includes/header.php';
 const stars = document.querySelectorAll('.star-btn');
 const input = document.getElementById('ratingInput');
 if (stars.length) {
+    const paintStars = (count, className) => {
+        stars.forEach((star, index) => star.classList.toggle(className, index < count));
+    };
+
     stars.forEach((s, i) => {
-        s.addEventListener('mouseover', () => stars.forEach((x,j) => x.style.color = j<=i ? '#C8961E' : '#aaa'));
-        s.addEventListener('mouseout',  () => {
-            const v = parseInt(input.value||0);
-            stars.forEach((x,j) => x.style.color = j < v ? '#C8961E' : '#aaa');
+        s.addEventListener('mouseover', () => paintStars(i + 1, 'is-preview'));
+        s.addEventListener('mouseout', () => {
+            paintStars(0, 'is-preview');
         });
         s.addEventListener('click', () => {
-            input.value = i+1;
-            stars.forEach((x,j) => x.style.color = j<=i ? '#C8961E' : '#aaa');
+            input.value = i + 1;
+            stars.forEach((star, index) => star.setAttribute('aria-checked', index === i ? 'true' : 'false'));
+            paintStars(i + 1, 'is-active');
         });
     });
 }
