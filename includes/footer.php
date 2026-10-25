@@ -88,7 +88,13 @@ $youtubeUrl = filter_var($footerSettings['youtube_url'], FILTER_VALIDATE_URL)
                         <?= $footerEscape($footerSettings['copyright']) ?>
                     </p>
                 </div>
-                <?php if (empty($isAdminDashboard)): ?>
+                <?php if (!empty($isAdminDashboard)): ?>
+                <div class="col-md-4 text-center text-md-end mt-2 mt-md-0">
+                    <a href="footer_settings.php" class="btn btn-gold btn-sm">
+                        <i class="fas fa-pen-to-square me-1"></i>Chỉnh sửa footer
+                    </a>
+                </div>
+                <?php else: ?>
                 <div class="col-md-4 text-center text-md-end mt-2 mt-md-0">
                     <a href="admin/login.php" class="text-secondary text-decoration-none small">
                     </a>

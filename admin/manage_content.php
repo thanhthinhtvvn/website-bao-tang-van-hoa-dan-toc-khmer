@@ -150,10 +150,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 } else {
                     $name = trim($_POST['name'] ?? '');
-                    $description = trim($_POST['description'] ?? '');
-                    $origin = trim($_POST['origin'] ?? '');
-                    $period = trim($_POST['period'] ?? '');
-                    $categoryId = (int) ($_POST['category_id'] ?? 0);
+                    $description = is_string($_POST['description'] ?? null)
+                        ? trim($_POST['description'])
+                        : '';
                     if ($name === '') {
                         throw new RuntimeException('Vui lòng nhập tên hiện vật.');
                     }
@@ -166,12 +165,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 if ($type === 'artifacts') {
                     if ($id > 0) {
-                        $stmt = $conn->prepare('UPDATE artifacts SET name = ?, description = ?, origin = ?, period = ?, image = ?, category_id = NULLIF(?, 0) WHERE id = ?');
-                        $stmt->bind_param('sssssii', $name, $description, $origin, $period, $image, $categoryId, $id);
+                        $stmt = $conn->prepare('UPDATE artifacts SET name = ?, description = ?, image = ? WHERE id = ?');
+                        $stmt->bind_param('sssi', $name, $description, $image, $id);
                     } else {
                         $adminId = (int) $_SESSION['admin_id'];
-                        $stmt = $conn->prepare('INSERT INTO artifacts (name, description, origin, period, image, category_id, admin_id) VALUES (?, ?, ?, ?, ?, NULLIF(?, 0), ?)');
-                        $stmt->bind_param('sssssii', $name, $description, $origin, $period, $image, $categoryId, $adminId);
+                        $stmt = $conn->prepare('INSERT INTO artifacts (name, description, image, admin_id) VALUES (?, ?, ?, ?)');
+                        $stmt->bind_param('sssi', $name, $description, $image, $adminId);
                     }
                 }
 
@@ -198,6 +197,13 @@ if ($type !== 'reviews' && isset($_GET['edit'])) {
         $edit = $stmt->get_result()->fetch_assoc();
         $stmt->close();
     }
+}
+
+if ($type === 'artifacts') {
+    $artifactDescription = $_SERVER['REQUEST_METHOD'] === 'POST'
+        && is_string($_POST['description'] ?? null)
+        ? $_POST['description']
+        : ($edit['description'] ?? '');
 }
 
 if ($type === 'events' && isset($_GET['banner_edit'])) {
@@ -230,11 +236,10 @@ if (isset($_GET['msg'])) {
 }
 
 if ($type === 'events') {
-    $rows = $conn->query('SELECT id, title, description, image FROM events ORDER BY event_date DESC');
+    $rows = $conn->query('SELECT id, title, description, image FROM events ORDER BY created_at DESC, id DESC');
     $eventBanners = $conn->query("SELECT id, content, url FROM media WHERE `table` = 'event_slides' ORDER BY id ASC");
 } elseif ($type === 'artifacts') {
-    $rows = $conn->query('SELECT a.id, a.name, a.description, a.origin, a.period, a.image, a.category_id, c.name AS category_name FROM artifacts a LEFT JOIN categories c ON a.category_id = c.id ORDER BY a.created_at DESC');
-    $categories = $conn->query('SELECT id, name FROM categories ORDER BY name');
+    $rows = $conn->query('SELECT id, name, description, image FROM artifacts ORDER BY created_at DESC');
 } else {
     $rows = $conn->query('SELECT r.id, r.content, r.rating, r.created_at, u.full_name, u.email FROM reviews r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC');
 }
@@ -359,31 +364,19 @@ admin_page_start($section['title']);
                     <label class="form-label">Tên hiện vật</label>
                     <input class="form-control" name="name" maxlength="200" required value="<?= htmlspecialchars($edit['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Danh mục</label>
-                    <select class="form-select" name="category_id">
-                        <option value="0">Chưa phân loại</option>
-                        <?php while ($category = $categories->fetch_assoc()): ?>
-                        <option value="<?= (int) $category['id'] ?>" <?= (int) ($edit['category_id'] ?? 0) === (int) $category['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                        <?php endwhile; ?>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Nguồn gốc</label>
-                    <input class="form-control" name="origin" maxlength="200" value="<?= htmlspecialchars($edit['origin'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Thời kỳ</label>
-                    <input class="form-control" name="period" maxlength="100" value="<?= htmlspecialchars($edit['period'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                </div>
                 <?php endif; ?>
 
+                <?php if ($type === 'artifacts'): ?>
+                <div class="col-12">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-control" name="description" rows="4"><?= htmlspecialchars($artifactDescription, ENT_QUOTES, 'UTF-8') ?></textarea>
+                </div>
+                <?php else: ?>
                 <div class="col-12">
                     <label class="form-label">Mô tả</label>
                     <textarea class="form-control" name="description" rows="4"><?= htmlspecialchars($edit['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                 </div>
+                <?php endif; ?>
                 <div class="col-md-8">
                     <label class="form-label">Ảnh <?= $edit ? '(để trống nếu giữ ảnh hiện tại)' : '(không bắt buộc)' ?></label>
                     <input class="form-control" type="file" name="image_file" accept="image/jpeg,image/png,image/gif,image/webp">
@@ -415,7 +408,6 @@ admin_page_start($section['title']);
                             <th>Người đánh giá</th><th>Nội dung</th><th>Số sao</th><th>Ngày gửi</th><th></th>
                         <?php else: ?>
                             <th>Ảnh</th><th>Tên</th><th>Mô tả</th>
-                            <?php if ($type === 'artifacts'): ?><th>Danh mục</th><th>Nguồn gốc</th><th>Thời kỳ</th><?php endif; ?>
                             <th></th>
                         <?php endif; ?>
                     </tr>
@@ -440,12 +432,9 @@ admin_page_start($section['title']);
                         <?php else: ?>
                             <td><?php if (!empty($row['image'])): ?><img src="../uploads/<?= htmlspecialchars($section['folder'], ENT_QUOTES, 'UTF-8') ?>/<?= rawurlencode(basename($row['image'])) ?>" alt=""><?php else: ?><span class="text-muted">Chưa có ảnh</span><?php endif; ?></td>
                             <td class="fw-semibold"><?= htmlspecialchars($row[$type === 'events' ? 'title' : 'name'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td style="min-width:220px"><?= htmlspecialchars(mb_substr($row['description'] ?? '', 0, 140), ENT_QUOTES, 'UTF-8') ?></td>
-                            <?php if ($type === 'artifacts'): ?>
-                                <td><?= htmlspecialchars($row['category_name'] ?? '—', ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($row['origin'] ?? '—', ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($row['period'] ?? '—', ENT_QUOTES, 'UTF-8') ?></td>
-                            <?php endif; ?>
+                            <td style="min-width:220px">
+                                <?= htmlspecialchars(mb_substr($row['description'] ?? '', 0, 140), ENT_QUOTES, 'UTF-8') ?>
+                            </td>
                             <td class="text-nowrap">
                                 <a class="btn btn-sm btn-outline-primary" href="manage_content.php?type=<?= htmlspecialchars($type, ENT_QUOTES, 'UTF-8') ?>&edit=<?= (int) $row['id'] ?>">Sửa</a>
                                 <form class="d-inline" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa mục này?')">

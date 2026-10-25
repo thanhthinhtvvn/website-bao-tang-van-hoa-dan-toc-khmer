@@ -5,7 +5,7 @@ require_once 'includes/event_description.php';
 $page_title = 'Sự Kiện - Bảo Tàng Văn Hóa Dân Tộc Khmer';
 include 'includes/header.php';
 
-$events_result = $conn->query("SELECT * FROM events ORDER BY event_date DESC");
+$events_result = $conn->query("SELECT * FROM events ORDER BY created_at DESC, id DESC");
 $event_slides_result = $conn->query(
     "SELECT content, url FROM media WHERE `table` = 'event_slides' ORDER BY id ASC"
 );

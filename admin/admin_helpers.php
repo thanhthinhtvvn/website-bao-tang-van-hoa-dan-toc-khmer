@@ -71,7 +71,7 @@ function admin_page_start(string $title): void
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
             body { min-height: 100vh; background: #f8f5ee; }
-            .admin-header { background: linear-gradient(135deg, #C8961E 0%, #a07010 100%); }
+            .admin-header { background: #C8961E; }
             .admin-main { max-width: 1320px; }
             .table img { width: 72px; height: 54px; object-fit: cover; border-radius: 6px; }
         </style>

@@ -4,10 +4,7 @@ require_once 'config/db.php';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) { header("Location: artifacts.php"); exit; }
 
-$result = $conn->query("SELECT a.*, c.name as category_name 
-                        FROM artifacts a 
-                        LEFT JOIN categories c ON a.category_id = c.id 
-                        WHERE a.id = $id");
+$result = $conn->query("SELECT a.* FROM artifacts a WHERE a.id = $id");
 
 if ($result->num_rows === 0) { header("Location: artifacts.php"); exit; }
 $a = $result->fetch_assoc();
@@ -52,39 +49,12 @@ include 'includes/header.php';
             <!-- KHUNG 2: THÔNG TIN CHI TIẾT Ở PHÍA DƯỚI -->
             <div class="card border-0 shadow-sm p-4 text-center" style="background:#fff;">
                 
-                <!-- Danh mục badge -->
-                <?php if (!empty($a['category_name'])): ?>
-                <div>
-                    <span class="badge mb-3 px-3 py-2 d-inline-block" style="background:#C8961E; font-size:0.85rem;">
-                        <i class="fas fa-tag me-1"></i><?= htmlspecialchars($a['category_name']) ?>
-                    </span>
-                </div>
-                <?php endif; ?>
-
                 <!-- Tên hiện vật -->
                 <h2 class="fw-bold mb-4"><?= htmlspecialchars($a['name']) ?></h2>
 
                 <!-- Thông tin tóm tắt -->
                 <div class="row g-3 mb-4 justify-content-center">
-                    <?php if (!empty($a['origin'])): ?>
-                    <div class="col-md-4 col-sm-12">
-                        <div class="p-3 rounded h-100 text-center" style="background:#fdf6e3;border-top:4px solid #C8961E;">
-                            <small class="text-muted d-block"><i class="fas fa-map-marker-alt text-warning me-1"></i>Nguồn gốc</small>
-                            <strong><?= htmlspecialchars($a['origin']) ?></strong>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($a['period'])): ?>
-                    <div class="col-md-4 col-sm-12">
-                        <div class="p-3 rounded h-100 text-center" style="background:#fdf6e3;border-top:4px solid #C8961E;">
-                            <small class="text-muted d-block"><i class="fas fa-history text-warning me-1"></i>Thời kỳ</small>
-                            <strong><?= htmlspecialchars($a['period']) ?></strong>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <div class="col-md-4 col-sm-12">
+                    <div class="col-md-6 col-sm-12">
                         <div class="p-3 rounded h-100 text-center" style="background:#fdf6e3;border-top:4px solid #C8961E;">
                             <small class="text-muted d-block"><i class="fas fa-calendar text-warning me-1"></i>Ngày cập nhật</small>
                             <strong><?= date('d/m/Y', strtotime($a['created_at'])) ?></strong>

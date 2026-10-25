@@ -48,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
         }
         .login-card {
-            background: #121212;
-            color: #f8f5ed;
+            background: #fff;
+            color: #212529;
             border-radius: 16px;
             padding: 40px;
             width: 100%;
@@ -65,20 +65,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #8B1A1A;
         }
         .login-logo h4 {
-            color: #f5dfa0;
+            color: #8A6500;
             font-weight: 700;
             margin-top: 10px;
             font-size: 16px;
         }
-        .login-logo p { color: #c8c8c8 !important; }
+        .login-logo p { color: #6c757d !important; }
         .login-card .input-group-text,
         .login-card .form-control {
-            border-color: #414141;
-            background-color: #121212;
-            color: #f8f5ed;
+            border-color: #ced4da;
+            background-color: #fff;
+            color: #212529;
         }
-        .login-card .input-group-text { color: #c8c8c8; }
-        .login-card .form-control::placeholder { color: #aeb4bc; }
+        .login-card .input-group-text { color: #6c757d; }
+        .login-card .form-control::placeholder { color: #6c757d; }
         .btn-login {
             background: #b42323;
             border: none;
@@ -102,11 +102,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-top: 20px;
         }
         .back-link a {
-            color: #f5dfa0;
+            color: #8A6500;
             text-decoration: none;
             font-size: 14px;
         }
-        .login-card a[href="forgot_password.php"] { color: #f5dfa0 !important; }
+        .login-card a[href="forgot_password.php"] { color: #8A6500 !important; }
     </style>
 </head>
 <body>

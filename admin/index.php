@@ -8,8 +8,8 @@ $event_count = $conn->query("SELECT COUNT(*) AS total FROM events")->fetch_assoc
 $artifact_count = $conn->query("SELECT COUNT(*) AS total FROM artifacts")->fetch_assoc()['total'];
 $user_count = $conn->query("SELECT COUNT(*) AS total FROM users")->fetch_assoc()['total'];
 $review_count = $conn->query("SELECT COUNT(*) AS total FROM reviews")->fetch_assoc()['total'];
-$events = $conn->query('SELECT id, title, description, image FROM events ORDER BY event_date DESC LIMIT 4');
-$artifacts = $conn->query('SELECT a.id, a.name, a.description, a.image, c.name AS category_name FROM artifacts a LEFT JOIN categories c ON a.category_id = c.id ORDER BY a.created_at DESC LIMIT 6');
+$events = $conn->query('SELECT id, title, description, image FROM events ORDER BY created_at DESC, id DESC LIMIT 4');
+$artifacts = $conn->query('SELECT id, name, image FROM artifacts ORDER BY created_at DESC LIMIT 8');
 $reviews = $conn->query('SELECT r.id, r.content, r.rating, r.created_at, u.full_name FROM reviews r LEFT JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC LIMIT 5');
 $slides = $conn->query("SELECT content, url FROM media WHERE `table` = 'hero_slides' ORDER BY id ASC");
 
@@ -52,8 +52,8 @@ function dashboard_image_src(?string $image, string $folder): ?string
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #c8961e; --gold-dark: #a07010; --page: #241f12; --card: #121212; }
-        body { min-height: 100vh; background: var(--page); color: #f8f5ed; }
+        :root { --gold: #c8961e; --gold-dark: #a07010; --page: #fff; --card: #121212; }
+        body { min-height: 100vh; background: var(--page); color: var(--gold-dark); }
         .admin-nav { background: var(--gold); }
         .admin-nav .nav-link, .admin-nav .navbar-brand { color: #fff; }
         .admin-hero .carousel-bg { height: 400px; }
@@ -142,7 +142,7 @@ function dashboard_image_src(?string $image, string $folder): ?string
         .admin-site-footer hr { border-color: rgba(255,255,255,.5); }
         .admin-site-footer a { color: #fff; }
         .admin-site-footer a:hover { color: #fff; }
-        .admin-card { background: var(--card); color: #f8f5ed; border: 0; border-radius: 8px; overflow: hidden; }
+        .admin-card { background: #fff; color: #212529; border: 0; border-radius: 8px; overflow: hidden; }
         .content-section .admin-card {
             border: 1px solid rgba(200,150,30,.2);
             border-radius: 12px;
@@ -154,11 +154,25 @@ function dashboard_image_src(?string $image, string $folder): ?string
             border-color: rgba(240,192,64,.65);
             box-shadow: 0 14px 28px rgba(0,0,0,.34) !important;
         }
-        .admin-card .card-body { background: var(--card); }
-        .admin-card .card-title { color: #fff; }
-        .admin-card .card-text { color: #c8c8c8 !important; }
+        .admin-card .card-body { background: #fff; }
+        .admin-card .card-title { color: #212529; }
+        .admin-card .card-text { color: #212529 !important; }
+        .artifact-card-image { height: 280px !important; object-fit: contain !important; background: #fdf6e3; }
+        .artifact-card-title { font-size: 1rem; }
+        .content-section .admin-card .btn-outline-warning {
+            color: var(--gold-dark);
+            border-color: var(--gold-dark);
+        }
+        .content-section .admin-card .btn-outline-warning:hover {
+            color: #fff;
+            background: var(--gold-dark);
+            border-color: var(--gold-dark);
+        }
         .admin-card .card-img-top { height: 180px; object-fit: cover; }
-        .stat-card { background: var(--card); color: #fff; border: 0; border-left: 4px solid var(--gold); }
+        .stat-card { background: var(--gold); color: #fff; border: 0; border-left: 4px solid var(--gold-dark); }
+        .stat-card .text-secondary { color: #fff !important; }
+        .stat-card .btn-outline-warning { color: #fff; border-color: #fff; }
+        .stat-card .btn-outline-warning:hover { color: var(--gold-dark); background: #fff; border-color: #fff; }
         .review-card { background: var(--card); color: #f8f5ed; border: 1px solid rgba(200,150,30,.25); }
         .btn-gold { background: var(--gold); border-color: var(--gold); color: #fff; }
         .btn-gold:hover { background: var(--gold-dark); border-color: var(--gold-dark); color: #fff; }
@@ -294,11 +308,15 @@ function dashboard_image_src(?string $image, string $folder): ?string
                 <?php while ($artifact = $artifacts->fetch_assoc()): $artifactImage = dashboard_image_src($artifact['image'] ?? null, 'artifacts'); ?>
                 <div class="col-lg-3 col-md-6">
                     <div class="card admin-card h-100 shadow-sm">
-                        <?php if ($artifactImage): ?><img class="card-img-top" src="<?= htmlspecialchars($artifactImage, ENT_QUOTES, 'UTF-8') ?>" alt=""><?php else: ?><div class="d-flex align-items-center justify-content-center" style="height:180px;background:linear-gradient(135deg,#6b5215,#c8961e)"><i class="fas fa-image fa-3x text-white opacity-50"></i></div><?php endif; ?>
-                        <div class="card-body d-flex flex-column">
-                            <?php if (!empty($artifact['category_name'])): ?><span class="badge bg-warning text-dark align-self-start mb-2"><?= htmlspecialchars($artifact['category_name'], ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
-                            <h3 class="h5 card-title"><?= htmlspecialchars($artifact['name'], ENT_QUOTES, 'UTF-8') ?></h3>
-                            <p class="card-text small flex-grow-1"><?= htmlspecialchars(mb_substr($artifact['description'] ?? '', 0, 110), ENT_QUOTES, 'UTF-8') ?>...</p>
+                        <?php if ($artifactImage): ?>
+                            <img class="card-img-top artifact-card-image" src="<?= htmlspecialchars($artifactImage, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($artifact['name'], ENT_QUOTES, 'UTF-8') ?>">
+                        <?php else: ?>
+                            <div class="d-flex align-items-center justify-content-center" style="height:280px;background:linear-gradient(135deg,#6b5215,#c8961e)">
+                                <i class="fas fa-image fa-3x text-white opacity-50"></i>
+                            </div>
+                        <?php endif; ?>
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <h3 class="h6 card-title artifact-card-title text-center"><?= htmlspecialchars($artifact['name'], ENT_QUOTES, 'UTF-8') ?></h3>
                             <div class="d-flex gap-2">
                                 <a href="manage_content.php?type=artifacts&edit=<?= (int) $artifact['id'] ?>" class="btn btn-outline-warning btn-sm flex-grow-1"><i class="fas fa-edit me-1"></i>Sửa</a>
                                 <form method="post" action="manage_content.php?type=artifacts" onsubmit="return confirm('Bạn có chắc muốn xóa hiện vật này?')">
@@ -319,7 +337,6 @@ function dashboard_image_src(?string $image, string $folder): ?string
                 <h2 class="h4 section-heading fw-bold mb-0">Đánh giá gần đây</h2>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="manage_content.php?type=reviews" class="btn btn-outline-warning btn-sm">Quản lý tất cả (<?= (int) $review_count ?>)</a>
-                    <a href="footer_settings.php" class="btn btn-gold btn-sm"><i class="fas fa-pen-to-square me-1"></i>Chỉnh sửa footer</a>
                 </div>
             </div>
             <?php if ($review_count > 0): ?>
